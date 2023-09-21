@@ -1,3 +1,7 @@
-﻿  glad.c
-  main.cpp
+﻿  main.cpp
+C:\Users\Jade\Documents\GitHub\PongOpenGL\PongOpenGL\PongOpenGL\src\main.cpp(47,56): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\Jade\Documents\GitHub\PongOpenGL\PongOpenGL\PongOpenGL\src\main.cpp(47,46): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\Jade\Documents\GitHub\PongOpenGL\PongOpenGL\PongOpenGL\src\main.cpp(210,45): warning C4312: 'type cast': conversion from 'GLint' to 'void *' of greater size
+C:\Users\Jade\Documents\GitHub\PongOpenGL\PongOpenGL\PongOpenGL\src\main.cpp(307,56): warning C4244: 'argument': conversion from 'unsigned int' to 'float', possible loss of data
+C:\Users\Jade\Documents\GitHub\PongOpenGL\PongOpenGL\PongOpenGL\src\main.cpp(307,46): warning C4244: 'argument': conversion from 'unsigned int' to 'float', possible loss of data
   PongOpenGL.vcxproj -> C:\Users\Jade\Documents\GitHub\PongOpenGL\PongOpenGL\x64\Debug\PongOpenGL.exe
