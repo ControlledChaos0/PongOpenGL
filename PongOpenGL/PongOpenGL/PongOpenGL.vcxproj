@@ -113,6 +113,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>GLFW\glfw3.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <IgnoreSpecificDefaultLibraries>msvcrt.lib</IgnoreSpecificDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -134,10 +135,19 @@
   <ItemGroup>
     <ClCompile Include="lib\glad.c" />
     <ClCompile Include="lib\stb.cpp" />
+    <ClCompile Include="src\init.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\vao.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\vaoTemplate.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\main.h" />
+    <ClInclude Include="src\init.hh" />
+    <ClInclude Include="src\vao.hh">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="src\vaoTemplate.hh" />
   </ItemGroup>
   <ItemGroup>
     <None Include="assets\main.fs" />

@@ -1,7 +1,5 @@
-﻿  main.cpp
-C:\Users\Jade\Documents\GitHub\PongOpenGL\PongOpenGL\PongOpenGL\src\main.cpp(47,56): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-C:\Users\Jade\Documents\GitHub\PongOpenGL\PongOpenGL\PongOpenGL\src\main.cpp(47,46): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-C:\Users\Jade\Documents\GitHub\PongOpenGL\PongOpenGL\PongOpenGL\src\main.cpp(210,45): warning C4312: 'type cast': conversion from 'GLint' to 'void *' of greater size
-C:\Users\Jade\Documents\GitHub\PongOpenGL\PongOpenGL\PongOpenGL\src\main.cpp(307,56): warning C4244: 'argument': conversion from 'unsigned int' to 'float', possible loss of data
-C:\Users\Jade\Documents\GitHub\PongOpenGL\PongOpenGL\PongOpenGL\src\main.cpp(307,46): warning C4244: 'argument': conversion from 'unsigned int' to 'float', possible loss of data
-  PongOpenGL.vcxproj -> C:\Users\Jade\Documents\GitHub\PongOpenGL\PongOpenGL\x64\Debug\PongOpenGL.exe
+﻿  init.cpp
+C:\Users\Jade\Documents\GitHub\PongOpenGL\PongOpenGL\PongOpenGL\src\init.cpp(43,56): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\Jade\Documents\GitHub\PongOpenGL\PongOpenGL\PongOpenGL\src\init.cpp(43,46): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+init.obj : error LNK2001: unresolved external symbol "unsigned int shaderProgram" (?shaderProgram@@3IA)
+C:\Users\Jade\Documents\GitHub\PongOpenGL\PongOpenGL\x64\Debug\PongOpenGL.exe : fatal error LNK1120: 1 unresolved externals
