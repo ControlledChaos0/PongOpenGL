@@ -386,11 +386,11 @@ int main() {
 
 	gen2DCircleArray(ballVertices, ballIndices, numTriangles, 0.5f);
 
-	vec2 ballOffsets[] = {
+	vec2 ballOffset = {
 		screenWidth / 2.0f, screenHeight / 2.0f
 	};
 
-	vec2 ballSizes[] = {
+	vec2 ballSize = {
 		ballDiameter, ballDiameter
 	};
 
@@ -403,11 +403,11 @@ int main() {
 	setAttPointer<float>(ballVAO.posVBO, 0, 2, GL_FLOAT, 2, 0);
 
 	// offset VBO
-	genBufferObject<vec2>(ballVAO.offsetVBO, GL_ARRAY_BUFFER, 1, ballOffsets, GL_DYNAMIC_DRAW);
+	genBufferObject<vec2>(ballVAO.offsetVBO, GL_ARRAY_BUFFER, 1, &ballOffset, GL_DYNAMIC_DRAW);
 	setAttPointer<float>(ballVAO.offsetVBO, 1, 2, GL_FLOAT, 2, 0, 1);
 
 	//size VBO
-	genBufferObject<vec2>(ballVAO.sizeVBO, GL_ARRAY_BUFFER, 1, ballSizes, GL_STATIC_DRAW);
+	genBufferObject<vec2>(ballVAO.sizeVBO, GL_ARRAY_BUFFER, 1, &ballSize, GL_STATIC_DRAW);
 	setAttPointer<float>(ballVAO.sizeVBO, 2, 2, GL_FLOAT, 2, 0, 1);
 
 	//EBO
@@ -417,7 +417,7 @@ int main() {
 	unbindBuffer(GL_ARRAY_BUFFER);
 	unbindVAO(); 
 
-	ballVelocity.x = 1.0f;
+	ballVelocity = initBallVelocity;
 
 	//render loop
 	while (!glfwWindowShouldClose(window)) {
@@ -428,24 +428,48 @@ int main() {
 		//input
 		processPaddleInput(window, dt, paddleOffsets);
 
-		//clear screen for new frame
-		clearScreen();
-
 		/*
 			physics
 		*/
 
 		//update position
-		ballOffsets[0].x += ballVelocity.x;
-		ballOffsets[0].y += ballVelocity.y;
+		ballOffset.x += ballVelocity.x * dt;
+		ballOffset.y += ballVelocity.y * dt;
+
+		/*
+			collision
+		*/
+
+		// playing field
+		bool reset = false;
+		if (ballOffset.y - ballRadius <= 0 || ballOffset.y + ballRadius >= screenHeight) {
+			ballVelocity.y *= -1;
+		}
+
+		if (ballOffset.x - ballRadius <= 0) {
+			std::cout << "Right player point" << std::endl;
+			reset = true;
+		}
+		else if (ballOffset.x + ballRadius >= screenWidth) {
+			std::cout << "Left player point" << std::endl;
+			reset = true;
+		}
+
+		if (reset) {
+			ballOffset = { screenWidth / 2.0f, screenHeight / 2.0f };
+			ballVelocity = initBallVelocity;
+		}
 
 		/*
 			graphics
 		*/
 
+		//clear screen for new frame
+		clearScreen();
+
 		//update
 		updateData<vec2>(paddleVAO.offsetVBO, 0, 2, paddleOffsets);
-		updateData<vec2>(ballVAO.offsetVBO, 0, 1, ballOffsets);
+		updateData<vec2>(ballVAO.offsetVBO, 0, 1, &ballOffset);
 
 		//render object
 		bindShader(shaderProgram);
