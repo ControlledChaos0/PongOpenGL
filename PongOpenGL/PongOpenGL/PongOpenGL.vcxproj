@@ -135,23 +135,14 @@
   <ItemGroup>
     <ClCompile Include="lib\glad.c" />
     <ClCompile Include="lib\stb.cpp" />
-    <ClCompile Include="src\init.cpp" />
     <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\vao.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="src\vaoTemplate.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\init.hh" />
-    <ClInclude Include="src\vao.hh">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
-    </ClInclude>
-    <ClInclude Include="src\vaoTemplate.hh" />
+    <ClInclude Include="src\main.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="assets\main.fs" />
-    <None Include="assets\main.vs" />
+    <None Include="assets\fragmentShader.glsl" />
+    <None Include="assets\vertexShader.glsl" />
     <None Include="glfw3.dll" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
