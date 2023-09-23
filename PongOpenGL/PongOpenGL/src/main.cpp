@@ -256,24 +256,27 @@ void processPaddleInput(GLFWwindow* window, double dt, vec2* paddleOffset) {
 		glfwSetWindowShouldClose(window, true);
 	}
 
+	paddleVelocities[0] = 0.0f;
+	paddleVelocities[1] = 0.0f;
+
 	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
 		if (paddleOffset[1].y < screenHeight - paddleBoundary) {
-			paddleOffset[1].y += dt * paddleSpeed;
+			paddleVelocities[1] = paddleSpeed;
 		}
 	}
 	if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
 		if (paddleOffset[1].y > paddleBoundary) {
-			paddleOffset[1].y -= dt * paddleSpeed;
+			paddleVelocities[1] = -paddleSpeed;
 		}
 	}
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
 		if (paddleOffset[0].y < screenHeight - paddleBoundary) {
-			paddleOffset[0].y += dt * paddleSpeed;
+			paddleVelocities[0] = paddleSpeed;
 		}
 	}
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
 		if (paddleOffset[0].y > paddleBoundary) {
-			paddleOffset[0].y -= dt * paddleSpeed;
+			paddleVelocities[0] = -paddleSpeed;
 		}
 	}
 }
@@ -355,6 +358,9 @@ int main() {
 		paddleWidth, paddleHeight
 	};
 
+	paddleVelocities[0] = 0.0f;
+	paddleVelocities[1] = 0.0f;
+
 	VAO paddleVAO;
 	genVAO(&paddleVAO);
 
@@ -419,6 +425,9 @@ int main() {
 
 	ballVelocity = initBallVelocity;
 
+	unsigned int framesSinceLastCollision = -1;
+	unsigned int framesThreshold = 10;
+
 	//render loop
 	while (!glfwWindowShouldClose(window)) {
 		//update time
@@ -432,6 +441,13 @@ int main() {
 			physics
 		*/
 
+		if (framesSinceLastCollision != -1) {
+			framesSinceLastCollision++;
+		}
+
+		paddleOffsets[0].y += paddleVelocities[0] * dt;
+		paddleOffsets[1].y += paddleVelocities[1] * dt;
+
 		//update position
 		ballOffset.x += ballVelocity.x * dt;
 		ballOffset.y += ballVelocity.y * dt;
@@ -441,23 +457,66 @@ int main() {
 		*/
 
 		// playing field
-		bool reset = false;
 		if (ballOffset.y - ballRadius <= 0 || ballOffset.y + ballRadius >= screenHeight) {
 			ballVelocity.y *= -1;
 		}
 
+		unsigned char reset = 0;
 		if (ballOffset.x - ballRadius <= 0) {
 			std::cout << "Right player point" << std::endl;
-			reset = true;
+			reset = 1;
 		}
 		else if (ballOffset.x + ballRadius >= screenWidth) {
 			std::cout << "Left player point" << std::endl;
-			reset = true;
+			reset = 2;
 		}
 
 		if (reset) {
 			ballOffset = { screenWidth / 2.0f, screenHeight / 2.0f };
-			ballVelocity = initBallVelocity;
+			ballVelocity.x = reset == 1 ? initBallVelocity.x : -initBallVelocity.x;
+			ballVelocity.y = initBallVelocity.y;
+		}
+
+
+		if (framesSinceLastCollision >= framesThreshold) {
+			/*
+			paddle collision
+		*/
+			int i = 0;
+			if (ballOffset.x > screenHeight / 2.0f) {
+				//if ball on right side, check with right paddle
+				i++;
+			}
+
+			//get distance from enter of ball to center of paddle
+			vec2 distance = { abs(ballOffset.x - paddleOffsets[i].x), abs(ballOffset.y - paddleOffsets[i].y) };
+
+			//check if no collision possible
+			if (distance.x <= halfPaddleWidth + ballRadius &&
+				distance.y <= halfPaddleHeight + ballRadius) {
+				bool collision = false;
+				if (distance.x <= halfPaddleWidth && distance.x >= halfPaddleWidth - ballRadius) {
+					collision = true;
+					ballVelocity.x *= -1;
+				}
+				else if (distance.y <= halfPaddleHeight && distance.y >= halfPaddleHeight - ballRadius) {
+					collision = true;
+					ballVelocity.y *= -1;
+				}
+
+				float squaredistance = pow(distance.x - halfPaddleWidth, 2) + pow(distance.y - halfPaddleHeight, 2);
+				if (squaredistance <= pow(ballRadius, 2)) {
+					collision = true;
+					ballVelocity.x *= -1;
+				}
+
+				if (collision) {
+					float k = 0.5f;
+					ballVelocity.x += .01f;
+					ballVelocity.y += k * paddleVelocities[i];
+					framesSinceLastCollision = 0;
+				}
+			}
 		}
 
 		/*

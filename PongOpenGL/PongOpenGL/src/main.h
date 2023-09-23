@@ -11,7 +11,9 @@ GLuint shaderProgram;
 //graphics parameters
 const float paddleSpeed = 250.0f;
 const float paddleHeight = 100.0f;
-const float paddleWidth = 15.0f;
+const float halfPaddleHeight = paddleHeight / 2.0f;
+const float paddleWidth = 10.0f;
+const float halfPaddleWidth = paddleWidth / 2.0f;
 const float ballDiameter = 10.0f;
 const float ballRadius = ballDiameter / 2.0f;
 const float paddleBoundary = (paddleHeight / 2.0f) + (ballDiameter / 2.0f);
@@ -31,7 +33,8 @@ struct vec2 {
 	float y;
 };
 
-//public ball vel
+//public vel
+float paddleVelocities[2];
 vec2 initBallVelocity = { 150.0f, 150.0f };
 vec2 ballVelocity;
 
