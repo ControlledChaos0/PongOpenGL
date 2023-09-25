@@ -3,7 +3,7 @@
 VBO::VBO(GLfloat* vertices, GLsizeiptr numElements, GLenum usage) {
 	glGenBuffers(1, &vboObj);
 	glBindBuffer(GL_ARRAY_BUFFER, vboObj);
-	glBufferData(GL_ARRAY_BUFFER, numElements * sizeof(GLfloat), vertices, usage);
+	glBufferData(GL_ARRAY_BUFFER, numElements, vertices, usage);
 }
 
 
