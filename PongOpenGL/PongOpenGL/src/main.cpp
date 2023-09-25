@@ -219,6 +219,7 @@ int main() {
 
 	//shaders
 	Shader shader("assets/vertexShader.glsl", "assets/fragmentShader.glsl");
+	shader.Activate();
 	setOrthographicProjection(shader, 0, screenWidth, 0, screenHeight, 0.0f, 1.0f);
 
 	//VAO VAO1;
@@ -305,54 +306,54 @@ int main() {
 	paddleSizeVBO.Unbind();
 	paddleEBO.Unbind();
 
-	/*
-		BALL VAO/BOS
-	*/
+	///*
+	//	BALL VAO/BOS
+	//*/
 
-	float* ballVertices;
-	unsigned int* ballIndices;
-	unsigned int numTriangles = 20;
+	//float* ballVertices;
+	//unsigned int* ballIndices;
+	//unsigned int numTriangles = 20;
 
-	gen2DCircleArray(ballVertices, ballIndices, numTriangles, 0.5f);
+	//gen2DCircleArray(ballVertices, ballIndices, numTriangles, 0.5f);
 
-	GLfloat ballOffset[] = {
-		screenWidth / 2.0f, screenHeight / 2.0f
-	};
+	//GLfloat ballOffset[] = {
+	//	screenWidth / 2.0f, screenHeight / 2.0f
+	//};
 
-	GLfloat ballSize[] = {
-		ballDiameter, ballDiameter
-	};
+	//GLfloat ballSize[] = {
+	//	ballDiameter, ballDiameter
+	//};
 
-	//setup VAO/BOs
-	VAO ballVAO;
-	ballVAO.Bind();
+	////setup VAO/BOs
+	//VAO ballVAO;
+	//ballVAO.Bind();
 
-	//pos VBO
-	VBO ballPosVBO(ballVertices, 2 * (numTriangles + 1), GL_STATIC_DRAW);
-	ballVAO.LinkVBO(ballPosVBO, 0);
+	////pos VBO
+	//VBO ballPosVBO(ballVertices, 2 * (numTriangles + 1), GL_STATIC_DRAW);
+	//ballVAO.LinkVBO(ballPosVBO, 0);
 
-	// offset VBO
-	VBO ballOffsetVBO(ballOffset, 2, GL_DYNAMIC_DRAW);
-	ballVAO.LinkVBO(ballOffsetVBO, 1, 0, 1);
+	//// offset VBO
+	//VBO ballOffsetVBO(ballOffset, 2, GL_DYNAMIC_DRAW);
+	//ballVAO.LinkVBO(ballOffsetVBO, 1, 0, 1);
 
-	//size VBO
-	VBO ballSizeVBO(ballSize, 2, GL_STATIC_DRAW);
-	ballVAO.LinkVBO(ballSizeVBO, 2, 0, 1);
+	////size VBO
+	//VBO ballSizeVBO(ballSize, 2, GL_STATIC_DRAW);
+	//ballVAO.LinkVBO(ballSizeVBO, 2, 0, 1);
 
-	//EBO
-	EBO ballEBO = EBO(ballIndices, 3 * numTriangles, GL_STATIC_DRAW);
+	////EBO
+	//EBO ballEBO = EBO(ballIndices, 3 * numTriangles, GL_STATIC_DRAW);
 
-	//unbind VBO and VAO
-	ballVAO.Unbind();
-	ballPosVBO.Unbind();
-	ballOffsetVBO.Unbind();
-	ballSizeVBO.Unbind();
-	ballEBO.Unbind();
+	////unbind VBO and VAO
+	//ballVAO.Unbind();
+	//ballPosVBO.Unbind();
+	//ballOffsetVBO.Unbind();
+	//ballSizeVBO.Unbind();
+	//ballEBO.Unbind();
 
-	ballVelocity = initBallVelocity;
+	//ballVelocity = initBallVelocity;
 
-	unsigned int framesSinceLastCollision = -1;
-	unsigned int framesThreshold = 10;
+	//unsigned int framesSinceLastCollision = -1;
+	//unsigned int framesThreshold = 10;
 
 	//render loop
 	while (!glfwWindowShouldClose(window)) {
@@ -360,91 +361,91 @@ int main() {
 		dt = glfwGetTime() - lastFrame;
 		lastFrame += dt;
 
-		//input
-		processPaddleInput(window, dt, paddleOffsets);
+		////input
+		//processPaddleInput(window, dt, paddleOffsets);
 
-		/*
-			physics
-		*/
+		///*
+		//	physics
+		//*/
 
-		if (framesSinceLastCollision != -1) {
-			framesSinceLastCollision++;
-		}
+		//if (framesSinceLastCollision != -1) {
+		//	framesSinceLastCollision++;
+		//}
 
-		paddleOffsets[1] += paddleVelocities[0] * dt;
-		paddleOffsets[3] += paddleVelocities[1] * dt;
+		//paddleOffsets[1] += paddleVelocities[0] * dt;
+		//paddleOffsets[3] += paddleVelocities[1] * dt;
 
-		//update position
-		ballOffset[0] += ballVelocity.x * dt;
-		ballOffset[1] += ballVelocity.y * dt;
+		////update position
+		//ballOffset[0] += ballVelocity.x * dt;
+		//ballOffset[1] += ballVelocity.y * dt;
 
-		/*
-			collision
-		*/
+		///*
+		//	collision
+		//*/
 
-		// playing field
-		if (ballOffset[1] - ballRadius <= 0 || ballOffset[1] + ballRadius >= screenHeight) {
-			ballVelocity.y *= -1;
-		}
+		//// playing field
+		//if (ballOffset[1] - ballRadius <= 0 || ballOffset[1] + ballRadius >= screenHeight) {
+		//	ballVelocity.y *= -1;
+		//}
 
-		unsigned char reset = 0;
-		if (ballOffset[0] - ballRadius <= 0) {
-			std::cout << "Right player point" << std::endl;
-			reset = 1;
-		}
-		else if (ballOffset[0] + ballRadius >= screenWidth) {
-			std::cout << "Left player point" << std::endl;
-			reset = 2;
-		}
+		//unsigned char reset = 0;
+		//if (ballOffset[0] - ballRadius <= 0) {
+		//	std::cout << "Right player point" << std::endl;
+		//	reset = 1;
+		//}
+		//else if (ballOffset[0] + ballRadius >= screenWidth) {
+		//	std::cout << "Left player point" << std::endl;
+		//	reset = 2;
+		//}
 
-		if (reset) {
-			ballOffset[0] = screenWidth / 2.0f;
-			ballOffset[1] = screenHeight / 2.0f;
-			ballVelocity.x = reset == 1 ? initBallVelocity.x : -initBallVelocity.x;
-			ballVelocity.y = initBallVelocity.y;
-		}
+		//if (reset) {
+		//	ballOffset[0] = screenWidth / 2.0f;
+		//	ballOffset[1] = screenHeight / 2.0f;
+		//	ballVelocity.x = reset == 1 ? initBallVelocity.x : -initBallVelocity.x;
+		//	ballVelocity.y = initBallVelocity.y;
+		//}
 
 
-		if (framesSinceLastCollision >= framesThreshold) {
-			/*
-			paddle collision
-		*/
-			int i = 0;
-			if (ballOffset[0] > screenHeight / 2.0f) {
-				//if ball on right side, check with right paddle
-				i++;
-			}
+		//if (framesSinceLastCollision >= framesThreshold) {
+		//	/*
+		//	paddle collision
+		//*/
+		//	int i = 0;
+		//	if (ballOffset[0] > screenHeight / 2.0f) {
+		//		//if ball on right side, check with right paddle
+		//		i++;
+		//	}
 
-			//get distance from enter of ball to center of paddle
-			vec2 distance = { abs(ballOffset[0] - paddleOffsets[(i * 2)]), abs(ballOffset[1] - paddleOffsets[(i * 2) + 1]) };
+		//	//get distance from enter of ball to center of paddle
+		//	vec2 distance = { abs(ballOffset[0] - paddleOffsets[(i * 2)]), abs(ballOffset[1] - paddleOffsets[(i * 2) + 1]) };
 
-			//check if no collision possible
-			if (distance.x <= halfPaddleWidth + ballRadius &&
-				distance.y <= halfPaddleHeight + ballRadius) {
-				bool collision = false;
-				if (distance.x <= halfPaddleWidth && distance.x >= halfPaddleWidth - ballRadius) {
-					collision = true;
-					ballVelocity.x *= -1;
-				}
-				else if (distance.y <= halfPaddleHeight && distance.y >= halfPaddleHeight - ballRadius) {
-					collision = true;
-					ballVelocity.y *= -1;
-				}
+		//	//check if no collision possible
+		//	if (distance.x <= halfPaddleWidth + ballRadius &&
+		//		distance.y <= halfPaddleHeight + ballRadius) {
+		//		bool collision = false;
+		//		if (distance.x <= halfPaddleWidth && distance.x >= halfPaddleWidth - ballRadius) {
+		//			collision = true;
+		//			ballVelocity.x *= -1;
+		//		}
+		//		else if (distance.y <= halfPaddleHeight && distance.y >= halfPaddleHeight - ballRadius) {
+		//			collision = true;
+		//			ballVelocity.y *= -1;
+		//		}
 
-				float squaredistance = pow(distance.x - halfPaddleWidth, 2) + pow(distance.y - halfPaddleHeight, 2);
-				if (squaredistance <= pow(ballRadius, 2)) {
-					collision = true;
-					ballVelocity.x *= -1;
-				}
+		//		float squaredistance = pow(distance.x - halfPaddleWidth, 2) + pow(distance.y - halfPaddleHeight, 2);
+		//		if (squaredistance <= pow(ballRadius, 2)) {
+		//			collision = true;
+		//			ballVelocity.x *= -1;
+		//		}
 
-				if (collision) {
-					float k = 0.5f;
-					ballVelocity.x += .01f;
-					ballVelocity.y += k * paddleVelocities[i];
-					framesSinceLastCollision = 0;
-				}
-			}
-		}
+		//		if (collision) {
+		//			float k = 0.5f;
+		//			ballVelocity.x += .01f;
+		//			ballVelocity.y += k * paddleVelocities[i];
+		//			framesSinceLastCollision = 0;
+		//		}
+		//	}
+		//}
 
 		/*
 			graphics
@@ -460,7 +461,7 @@ int main() {
 		//render object
 		shader.Activate();
 		draw(paddleVAO, GL_TRIANGLES, 3 * 2, GL_UNSIGNED_INT, 0, 2);
-		draw(ballVAO, GL_TRIANGLES, 3 * numTriangles, GL_UNSIGNED_INT, 0);
+		//draw(ballVAO, GL_TRIANGLES, 3 * numTriangles, GL_UNSIGNED_INT, 0);
 
 		//swap frames
 		newFrame(window);
@@ -473,11 +474,11 @@ int main() {
 	paddleSizeVBO.Delete();
 	paddleEBO.Delete();
 
-	ballVAO.Delete();
+	/*ballVAO.Delete();
 	ballPosVBO.Delete();
 	ballOffsetVBO.Delete();
 	ballSizeVBO.Delete();
-	ballEBO.Delete();
+	ballEBO.Delete();*/
 
 	shader.Delete();
 	cleanup();
