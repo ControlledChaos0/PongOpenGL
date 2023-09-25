@@ -1,7 +1,11 @@
 #include <string>
 #include <sstream>
 #include <fstream>
-#include "main.h"
+#include "main.hpp"
+#include "shader.hpp"
+#include "VAO.hpp"
+#include "VBO.hpp"
+#include "EBO.hpp"
 
 /*
 	initialization methods
@@ -48,92 +52,8 @@ bool loadGlad() {
 	shader methods
 */
 
-//read file
-std::string readFile(const char* filename) {
-	std::ifstream file;
-	std::stringstream buf;
-
-	std::string ret = "";
-
-	//open file
-	file.open(filename);
-
-	if (file.is_open()) {
-		buf << file.rdbuf();
-		ret = buf.str();
-	}
-	else {
-		std::cout << "Could not open " << filename << std::endl;
-	}
-
-	file.close();
-
-	return ret;
-}
-
-//generate shader
-int genShader(const char* filepath, GLenum type) {
-	std::string shaderSrc = readFile(filepath);
-	const GLchar* shader = shaderSrc.c_str();
-
-	//build and compile the shader
-	int shaderObj = glCreateShader(type);
-	glShaderSource(shaderObj, 1, &shader, NULL);
-	glCompileShader(shaderObj);
-
-	//check for errors
-	int success;
-	char infoLog[512];
-	glGetShaderiv(shaderObj, GL_COMPILE_STATUS, &success);
-	if (!success) {
-		glGetShaderInfoLog(shaderObj, 512, NULL, infoLog);
-		std::cout << "Error in shader compilation:" << std::endl << infoLog << std::endl;
-		return -1;
-	}
-
-	return shaderObj;
-}
-
-//generate shader program
-int genShaderProgram(const char* vertexShaderPath, const char* fragmentShaderPath) {
-	int shaderProgram = glCreateProgram();
-
-	//compile shaders
-	int vertexShader = genShader(vertexShaderPath, GL_VERTEX_SHADER);
-	int fragmentShader = genShader(fragmentShaderPath, GL_FRAGMENT_SHADER);
-
-	if (vertexShader == -1 || fragmentShader == -1) {
-		return -1;
-	}
-
-	//link shader
-	glAttachShader(shaderProgram, vertexShader);
-	glAttachShader(shaderProgram, fragmentShader);
-	glLinkProgram(shaderProgram);
-
-	//check for errors
-	int success;
-	char infoLog[512];
-	glGetShaderiv(shaderProgram, GL_LINK_STATUS, &success);
-	if (!success) {
-		glGetShaderInfoLog(shaderProgram, 512, NULL, infoLog);
-		std::cout << "Error in shader linking:" << std::endl << infoLog << std::endl;
-		return -1;
-	}
-
-	glDeleteShader(vertexShader);
-	glDeleteShader(fragmentShader);
-
-	return shaderProgram;
-}
-
-//bind shader
-void bindShader(int shaderProgram) {
-	glUseProgram(shaderProgram);
-}
-
 //set projection
-void setOrthographicProjection(int shaderProgram,
+void setOrthographicProjection(Shader shader,
 	float left, float right,
 	float bottom, float top,
 	float near, float far) {
@@ -150,75 +70,24 @@ void setOrthographicProjection(int shaderProgram,
 		{ -(right + left) / (right - left), -(top + bottom) / (top - bottom), -(far + near) / (far - near), 1.0f }
 	};
 
-	bindShader(shaderProgram);
-	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, &mat[0][0]);
-}
-
-//delete shader
-void deleteShader(int shaderProgram) {
-	glDeleteProgram(shaderProgram);
+	shader.Activate();
+	glUniformMatrix4fv(glGetUniformLocation(shader.shaderObj, "projection"), 1, GL_FALSE, &mat[0][0]);
 }
 
 /*
 	Vertex Array Object/Buffer Object Methods
 */
 
-//generate VAO
-void genVAO(VAO* vao) {
-	glGenVertexArrays(1, &vao->val);
-	glBindVertexArray(vao->val);
-}
-
-//generate buffer of certain type and set data
 template<typename T>
-void genBufferObject(GLuint& bo, GLenum type, GLuint numElements, T* data, GLenum usage) {
-	glGenBuffers(1, &bo);
-	glBindBuffer(type, bo);
-	glBufferData(type, numElements * sizeof(T), data, usage);
-}
-
-//update data in a buffer object
-template<typename T>
-void updateData(GLuint& bo, GLintptr offset, GLuint numElements, T* data) {
-	glBindBuffer(GL_ARRAY_BUFFER, bo);
+void updateData(VBO& bo, GLintptr offset, GLuint numElements, T* data) {
+	bo.Bind();
 	glBufferSubData(GL_ARRAY_BUFFER, offset, numElements * sizeof(T), data);
-}
-
-//set attribute pointers
-template<typename T>
-void setAttPointer(GLuint& bo, GLuint idx, GLint size, GLenum type, GLuint stride, GLuint offset, GLuint divisor) {
-	glBindBuffer(GL_ARRAY_BUFFER, bo);
-	glVertexAttribPointer(idx, size, type, GL_FALSE, stride * sizeof(T), (void*)(offset * sizeof(T)));
-	glEnableVertexAttribArray(idx);
-	if (divisor > 0) {
-		//reset idx attribute every divisor iteration through instances
-		glVertexAttribDivisor(idx, divisor);
-	}
 }
 
 //draw VAO
 void draw(VAO vao, GLenum mode, GLuint count, GLenum type, GLint indices, GLuint instanceCount) {
-	glBindVertexArray(vao.val);
+	vao.Bind();
 	glDrawElementsInstanced(mode, count, type, (void*)indices, instanceCount);
-}
-
-//unbind buffer
-void unbindBuffer(GLenum type) {
-	glBindBuffer(type, 0);
-}
-
-//unbind VAO
-void unbindVAO() {
-	glBindVertexArray(0);
-}
-
-//deallocate VAO/VBO memory
-void cleanup(VAO vao) {
-	glDeleteBuffers(1, &vao.posVBO);
-	glDeleteBuffers(1, &vao.offsetVBO);
-	glDeleteBuffers(1, &vao.sizeVBO);
-	glDeleteBuffers(1, & vao.EBO);
-	glDeleteVertexArrays(1, &vao.val);
 }
 
 //method to generate arrays for circle model
@@ -251,7 +120,7 @@ void gen2DCircleArray(float*& vertices, unsigned int*& indices, unsigned int num
 */
 
 //process input
-void processPaddleInput(GLFWwindow* window, double dt, vec2* paddleOffset) {
+void processPaddleInput(GLFWwindow* window, double dt, float* paddleOffset) {
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
 		glfwSetWindowShouldClose(window, true);
 	}
@@ -260,22 +129,22 @@ void processPaddleInput(GLFWwindow* window, double dt, vec2* paddleOffset) {
 	paddleVelocities[1] = 0.0f;
 
 	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
-		if (paddleOffset[1].y < screenHeight - paddleBoundary) {
+		if (paddleOffset[3] < screenHeight - paddleBoundary) {
 			paddleVelocities[1] = paddleSpeed;
 		}
 	}
 	if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
-		if (paddleOffset[1].y > paddleBoundary) {
+		if (paddleOffset[3] > paddleBoundary) {
 			paddleVelocities[1] = -paddleSpeed;
 		}
 	}
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-		if (paddleOffset[0].y < screenHeight - paddleBoundary) {
+		if (paddleOffset[1] < screenHeight - paddleBoundary) {
 			paddleVelocities[0] = paddleSpeed;
 		}
 	}
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-		if (paddleOffset[0].y > paddleBoundary) {
+		if (paddleOffset[1] > paddleBoundary) {
 			paddleVelocities[0] = -paddleSpeed;
 		}
 	}
@@ -301,6 +170,24 @@ void newFrame(GLFWwindow* window) {
 void cleanup() {
 	glfwTerminate();
 }
+
+//GLfloat vertices[] =
+//{
+//	-0.5f, -0.5f * float(sqrt(3)) / 3, 0.0f, // Lower left corner
+//	0.5f, -0.5f * float(sqrt(3)) / 3, 0.0f, // Lower right corner
+//	0.0f, 0.5f * float(sqrt(3)) * 2 / 3, 0.0f, // Upper corner
+//	-0.5f / 2, 0.5f * float(sqrt(3)) / 6, 0.0f, // Inner left
+//	0.5f / 2, 0.5f * float(sqrt(3)) / 6, 0.0f, // Inner right
+//	0.0f, -0.5f * float(sqrt(3)) / 3, 0.0f // Inner down
+//};
+//
+//// Indices for vertices order
+//GLuint indices[] =
+//{
+//	0, 3, 5, // Lower left triangle
+//	3, 2, 4, // Lower right triangle
+//	5, 4, 1 // Upper triangle
+//};
 
 int main() {
 	std::cout << "Initializing Window" << std::endl;
@@ -331,8 +218,41 @@ int main() {
 	glViewport(0, 0, screenWidth, screenHeight);
 
 	//shaders
-	shaderProgram = genShaderProgram("assets/vertexShader.glsl", "assets/fragmentShader.glsl");
-	setOrthographicProjection(shaderProgram, 0, screenWidth, 0, screenHeight, 0.0f, 1.0f);
+	Shader shader("assets/vertexShader.glsl", "assets/fragmentShader.glsl");
+	setOrthographicProjection(shader, 0, screenWidth, 0, screenHeight, 0.0f, 1.0f);
+
+	//VAO VAO1;
+	//VAO1.Bind();
+
+	//VBO VBO1(vertices, sizeof(vertices), GL_STATIC_DRAW);
+	//EBO EBO1(indices, sizeof(indices), GL_STATIC_DRAW);
+
+	//VAO1.LinkVBO(VBO1, 0);
+	//VAO1.Unbind();
+	//VBO1.Unbind();
+	//EBO1.Unbind();
+
+	//while (!glfwWindowShouldClose(window))
+	//{
+	//	// Specify the color of the background
+	//	glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
+	//	// Clean the back buffer and assign the new color to it
+	//	glClear(GL_COLOR_BUFFER_BIT);
+	//	// Tell OpenGL which Shader Program we want to use
+	//	shader.Activate();
+	//	// Bind the VAO so OpenGL knows to use it
+	//	VAO1.Bind();
+	//	// Draw primitives, number of indices, datatype of indices, index of indices
+	//	glDrawElements(GL_TRIANGLES, 9, GL_UNSIGNED_INT, 0);
+	//	// Swap the back buffer with the front buffer
+	//	glfwSwapBuffers(window);
+	//	// Take care of all GLFW events
+	//	glfwPollEvents();
+	//}
+
+	//VAO1.Delete();
+	//VBO1.Delete();
+	//EBO1.Delete();
 
 	//setup vertex data
 	float paddleVertices[] = {
@@ -349,12 +269,12 @@ int main() {
 	};
 
 	//offsets array
-	vec2 paddleOffsets[] = {
+	float paddleOffsets[] = {
 		35.0f, screenHeight / 2.0f,
 		screenWidth - 35.0f, screenHeight / 2.0f
 	};
 
-	vec2 paddleSizes[] = {
+	float paddleSizes[] = {
 		paddleWidth, paddleHeight
 	};
 
@@ -362,25 +282,28 @@ int main() {
 	paddleVelocities[1] = 0.0f;
 
 	VAO paddleVAO;
-	genVAO(&paddleVAO);
+	paddleVAO.Bind();
 
-	genBufferObject<float>(paddleVAO.posVBO, GL_ARRAY_BUFFER, 2 * 4, paddleVertices, GL_STATIC_DRAW);
-	setAttPointer<float>(paddleVAO.posVBO, 0, 2, GL_FLOAT, 2, 0);
+	VBO paddlePosVBO(paddleVertices, 2 * 4, GL_STATIC_DRAW);
+	paddleVAO.LinkVBO(paddlePosVBO, 0, 2);
 
 	// offset VBO
-	genBufferObject<vec2>(paddleVAO.offsetVBO, GL_ARRAY_BUFFER, 2, paddleOffsets, GL_DYNAMIC_DRAW);
-	setAttPointer<float>(paddleVAO.offsetVBO, 1, 2, GL_FLOAT, 2, 0, 1);
+	VBO paddleOffsetVBO(paddleOffsets, 2 * 2, GL_DYNAMIC_DRAW);
+	paddleVAO.LinkVBO(paddleOffsetVBO, 1, 0, 1);
 
 	//size VBO
-	genBufferObject<vec2>(paddleVAO.sizeVBO, GL_ARRAY_BUFFER, 2, paddleSizes, GL_STATIC_DRAW);
-	setAttPointer<float>(paddleVAO.sizeVBO, 2, 2, GL_FLOAT, 2, 0, 2);
+	VBO paddleSizeVBO(paddleSizes, 2 * 1, GL_STATIC_DRAW);
+	paddleVAO.LinkVBO(paddleSizeVBO, 2, 0, 2);
 
 	//EBO
-	genBufferObject<GLuint>(paddleVAO.EBO, GL_ELEMENT_ARRAY_BUFFER, 2 * 4, paddleIndices, GL_STATIC_DRAW);
+	EBO paddleEBO(paddleIndices, 2 * 4, GL_STATIC_DRAW);
 
 	//unbind VBO and VAO
-	unbindBuffer(GL_ARRAY_BUFFER);
-	unbindVAO();
+	paddleVAO.Unbind();
+	paddlePosVBO.Unbind();
+	paddleOffsetVBO.Unbind();
+	paddleSizeVBO.Unbind();
+	paddleEBO.Unbind();
 
 	/*
 		BALL VAO/BOS
@@ -392,36 +315,39 @@ int main() {
 
 	gen2DCircleArray(ballVertices, ballIndices, numTriangles, 0.5f);
 
-	vec2 ballOffset = {
+	GLfloat ballOffset[] = {
 		screenWidth / 2.0f, screenHeight / 2.0f
 	};
 
-	vec2 ballSize = {
+	GLfloat ballSize[] = {
 		ballDiameter, ballDiameter
 	};
 
 	//setup VAO/BOs
 	VAO ballVAO;
-	genVAO(&ballVAO);
+	ballVAO.Bind();
 
 	//pos VBO
-	genBufferObject<float>(ballVAO.posVBO, GL_ARRAY_BUFFER, 2 * (numTriangles + 1), ballVertices, GL_STATIC_DRAW);
-	setAttPointer<float>(ballVAO.posVBO, 0, 2, GL_FLOAT, 2, 0);
+	VBO ballPosVBO(ballVertices, 2 * (numTriangles + 1), GL_STATIC_DRAW);
+	ballVAO.LinkVBO(ballPosVBO, 0);
 
 	// offset VBO
-	genBufferObject<vec2>(ballVAO.offsetVBO, GL_ARRAY_BUFFER, 1, &ballOffset, GL_DYNAMIC_DRAW);
-	setAttPointer<float>(ballVAO.offsetVBO, 1, 2, GL_FLOAT, 2, 0, 1);
+	VBO ballOffsetVBO(ballOffset, 2, GL_DYNAMIC_DRAW);
+	ballVAO.LinkVBO(ballOffsetVBO, 1, 0, 1);
 
 	//size VBO
-	genBufferObject<vec2>(ballVAO.sizeVBO, GL_ARRAY_BUFFER, 1, &ballSize, GL_STATIC_DRAW);
-	setAttPointer<float>(ballVAO.sizeVBO, 2, 2, GL_FLOAT, 2, 0, 1);
+	VBO ballSizeVBO(ballSize, 2, GL_STATIC_DRAW);
+	ballVAO.LinkVBO(ballSizeVBO, 2, 0, 1);
 
 	//EBO
-	genBufferObject<unsigned int>(ballVAO.EBO, GL_ELEMENT_ARRAY_BUFFER, 3 * numTriangles, ballIndices, GL_STATIC_DRAW);
+	EBO ballEBO = EBO(ballIndices, 3 * numTriangles, GL_STATIC_DRAW);
 
 	//unbind VBO and VAO
-	unbindBuffer(GL_ARRAY_BUFFER);
-	unbindVAO(); 
+	ballVAO.Unbind();
+	ballPosVBO.Unbind();
+	ballOffsetVBO.Unbind();
+	ballSizeVBO.Unbind();
+	ballEBO.Unbind();
 
 	ballVelocity = initBallVelocity;
 
@@ -445,34 +371,35 @@ int main() {
 			framesSinceLastCollision++;
 		}
 
-		paddleOffsets[0].y += paddleVelocities[0] * dt;
-		paddleOffsets[1].y += paddleVelocities[1] * dt;
+		paddleOffsets[1] += paddleVelocities[0] * dt;
+		paddleOffsets[3] += paddleVelocities[1] * dt;
 
 		//update position
-		ballOffset.x += ballVelocity.x * dt;
-		ballOffset.y += ballVelocity.y * dt;
+		ballOffset[0] += ballVelocity.x * dt;
+		ballOffset[1] += ballVelocity.y * dt;
 
 		/*
 			collision
 		*/
 
 		// playing field
-		if (ballOffset.y - ballRadius <= 0 || ballOffset.y + ballRadius >= screenHeight) {
+		if (ballOffset[1] - ballRadius <= 0 || ballOffset[1] + ballRadius >= screenHeight) {
 			ballVelocity.y *= -1;
 		}
 
 		unsigned char reset = 0;
-		if (ballOffset.x - ballRadius <= 0) {
+		if (ballOffset[0] - ballRadius <= 0) {
 			std::cout << "Right player point" << std::endl;
 			reset = 1;
 		}
-		else if (ballOffset.x + ballRadius >= screenWidth) {
+		else if (ballOffset[0] + ballRadius >= screenWidth) {
 			std::cout << "Left player point" << std::endl;
 			reset = 2;
 		}
 
 		if (reset) {
-			ballOffset = { screenWidth / 2.0f, screenHeight / 2.0f };
+			ballOffset[0] = screenWidth / 2.0f;
+			ballOffset[1] = screenHeight / 2.0f;
 			ballVelocity.x = reset == 1 ? initBallVelocity.x : -initBallVelocity.x;
 			ballVelocity.y = initBallVelocity.y;
 		}
@@ -483,13 +410,13 @@ int main() {
 			paddle collision
 		*/
 			int i = 0;
-			if (ballOffset.x > screenHeight / 2.0f) {
+			if (ballOffset[0] > screenHeight / 2.0f) {
 				//if ball on right side, check with right paddle
 				i++;
 			}
 
 			//get distance from enter of ball to center of paddle
-			vec2 distance = { abs(ballOffset.x - paddleOffsets[i].x), abs(ballOffset.y - paddleOffsets[i].y) };
+			vec2 distance = { abs(ballOffset[0] - paddleOffsets[(i * 2)]), abs(ballOffset[1] - paddleOffsets[(i * 2) + 1]) };
 
 			//check if no collision possible
 			if (distance.x <= halfPaddleWidth + ballRadius &&
@@ -527,11 +454,11 @@ int main() {
 		clearScreen();
 
 		//update
-		updateData<vec2>(paddleVAO.offsetVBO, 0, 2, paddleOffsets);
-		updateData<vec2>(ballVAO.offsetVBO, 0, 1, &ballOffset);
+		/*updateData<float>(paddleOffsetVBO, 0, 2 * 2, paddleOffsets);
+		updateData<float>(ballOffsetVBO, 0, 2, ballOffset);*/
 
 		//render object
-		bindShader(shaderProgram);
+		shader.Activate();
 		draw(paddleVAO, GL_TRIANGLES, 3 * 2, GL_UNSIGNED_INT, 0, 2);
 		draw(ballVAO, GL_TRIANGLES, 3 * numTriangles, GL_UNSIGNED_INT, 0);
 
@@ -540,9 +467,19 @@ int main() {
 	}
 
 	//cleanup memory
-	cleanup(paddleVAO);
-	cleanup(ballVAO);
-	deleteShader(shaderProgram);
+	paddleVAO.Delete();
+	paddlePosVBO.Delete();
+	paddleOffsetVBO.Delete();
+	paddleSizeVBO.Delete();
+	paddleEBO.Delete();
+
+	ballVAO.Delete();
+	ballPosVBO.Delete();
+	ballOffsetVBO.Delete();
+	ballSizeVBO.Delete();
+	ballEBO.Delete();
+
+	shader.Delete();
 	cleanup();
 
 	return 0;

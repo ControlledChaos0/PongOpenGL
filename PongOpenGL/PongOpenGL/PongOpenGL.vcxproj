@@ -135,13 +135,23 @@
   <ItemGroup>
     <ClCompile Include="lib\glad.c" />
     <ClCompile Include="lib\stb.cpp" />
+    <ClCompile Include="src\EBO.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\shader.cpp" />
+    <ClCompile Include="src\VAO.cpp" />
+    <ClCompile Include="src\VBO.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\main.h" />
+    <ClInclude Include="src\EBO.hpp" />
+    <ClInclude Include="src\main.hpp" />
+    <ClInclude Include="src\shader.hpp" />
+    <ClInclude Include="src\VAO.hpp" />
+    <ClInclude Include="src\VBO.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="assets\fragmentShader.glsl" />
+    <None Include="assets\testFrag.glsl" />
+    <None Include="assets\testVert.glsl" />
     <None Include="assets\vertexShader.glsl" />
     <None Include="glfw3.dll" />
   </ItemGroup>

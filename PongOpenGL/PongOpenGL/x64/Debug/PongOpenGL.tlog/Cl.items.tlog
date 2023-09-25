@@ -1,3 +1,7 @@
 C:\Users\Jade\Documents\GitHub\PongOpenGL\PongOpenGL\PongOpenGL\lib\glad.c;C:\Users\Jade\Documents\GitHub\PongOpenGL\PongOpenGL\PongOpenGL\x64\Debug\glad.obj
 C:\Users\Jade\Documents\GitHub\PongOpenGL\PongOpenGL\PongOpenGL\lib\stb.cpp;C:\Users\Jade\Documents\GitHub\PongOpenGL\PongOpenGL\PongOpenGL\x64\Debug\stb.obj
+C:\Users\Jade\Documents\GitHub\PongOpenGL\PongOpenGL\PongOpenGL\src\EBO.cpp;C:\Users\Jade\Documents\GitHub\PongOpenGL\PongOpenGL\PongOpenGL\x64\Debug\EBO.obj
 C:\Users\Jade\Documents\GitHub\PongOpenGL\PongOpenGL\PongOpenGL\src\main.cpp;C:\Users\Jade\Documents\GitHub\PongOpenGL\PongOpenGL\PongOpenGL\x64\Debug\main.obj
+C:\Users\Jade\Documents\GitHub\PongOpenGL\PongOpenGL\PongOpenGL\src\shader.cpp;C:\Users\Jade\Documents\GitHub\PongOpenGL\PongOpenGL\PongOpenGL\x64\Debug\shader.obj
+C:\Users\Jade\Documents\GitHub\PongOpenGL\PongOpenGL\PongOpenGL\src\VAO.cpp;C:\Users\Jade\Documents\GitHub\PongOpenGL\PongOpenGL\PongOpenGL\x64\Debug\VAO.obj
+C:\Users\Jade\Documents\GitHub\PongOpenGL\PongOpenGL\PongOpenGL\src\VBO.cpp;C:\Users\Jade\Documents\GitHub\PongOpenGL\PongOpenGL\PongOpenGL\x64\Debug\VBO.obj
