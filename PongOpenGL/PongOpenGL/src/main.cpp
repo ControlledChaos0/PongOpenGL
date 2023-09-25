@@ -220,7 +220,7 @@ int main() {
 	//shaders
 	Shader shader("assets/vertexShader.glsl", "assets/fragmentShader.glsl");
 	shader.Activate();
-	//setOrthographicProjection(shader, 0, screenWidth, 0, screenHeight, 0.0f, 1.0f);
+	setOrthographicProjection(shader, 0, screenWidth, 0, screenHeight, 0.0f, 1.0f);
 
 	//setup vertex data
 	GLfloat paddleVertices[] = {
@@ -243,18 +243,27 @@ int main() {
 	};
 
 	GLfloat paddleSizes[] = {
-		paddleWidth, paddleHeight
+		10.0f, 100.0f
 	};
 
 	VAO paddleVAO;
 	paddleVAO.Bind();
 
 	VBO paddlePosVBO(paddleVertices, sizeof(paddleVertices), GL_STATIC_DRAW);
+	paddleVAO.LinkAttri(paddlePosVBO, 0, 2, GL_FLOAT, 2 * sizeof(GLfloat), 0);
+
+	VBO paddleOffsetVBO(paddleOffsets, sizeof(paddleOffsets), GL_DYNAMIC_DRAW);
+	paddleVAO.LinkAttri(paddleOffsetVBO, 1, 2, GL_FLOAT, 2 * sizeof(GLfloat), 0, 1);
+
+	VBO paddleSizeVBO(paddleSizes, sizeof(paddleSizes), GL_STATIC_DRAW);
+	paddleVAO.LinkAttri(paddleSizeVBO, 2, 2, GL_FLOAT, 2 * sizeof(GLfloat), 0, 2);
+
 	EBO paddleIndEBO(paddleIndices, sizeof(paddleIndices), GL_STATIC_DRAW);
 
-	paddleVAO.LinkVBO(paddlePosVBO, 0);
 	paddleVAO.Unbind();
 	paddlePosVBO.Unbind();
+	paddleOffsetVBO.Unbind();
+	paddleSizeVBO.Unbind();
 	paddleIndEBO.Unbind();
 
 	while (!glfwWindowShouldClose(window)) {
@@ -263,13 +272,15 @@ int main() {
 		shader.Activate();
 		paddleVAO.Bind();
 		//draw(paddleVAO, GL_TRIANGLES, 3 * 2, GL_UNSIGNED_INT, 0, 2);
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+		glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, 2);
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
 
 	paddleVAO.Delete();
 	paddlePosVBO.Delete();
+	paddleOffsetVBO.Delete();
+	paddleSizeVBO.Delete();
 	paddleIndEBO.Delete();
 	shader.Delete();
 	cleanup();

@@ -3,7 +3,7 @@
 EBO::EBO(GLuint* data, GLsizeiptr numElements, GLenum usage) {
 	glGenBuffers(1, &eboObj);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, eboObj);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, numElements * sizeof(GLuint), data, usage);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, numElements, data, usage);
 }
 
 void EBO::Bind() {

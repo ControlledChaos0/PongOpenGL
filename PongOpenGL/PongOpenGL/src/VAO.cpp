@@ -4,9 +4,9 @@ VAO::VAO() {
 	glGenVertexArrays(1, &vaoObj);
 }
 
-void VAO::LinkVBO(VBO VBO, GLuint layout, GLuint offset, GLuint divisor) {
+void VAO::LinkAttri(VBO VBO, GLuint layout, GLuint numComponents, GLenum type, GLsizeiptr stride, void* offset, GLuint divisor) {
 	VBO.Bind();
-	glVertexAttribPointer(layout, 3, GL_FLOAT, GL_FALSE, 0, (void*)(offset));
+	glVertexAttribPointer(layout, numComponents, type, GL_FALSE, stride, offset);
 	glEnableVertexAttribArray(layout);
 	if (divisor > 0) {
 		//reset idx attribute every divisor iteration through instances
