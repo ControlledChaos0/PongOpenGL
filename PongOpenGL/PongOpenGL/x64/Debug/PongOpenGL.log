@@ -1,11 +1,11 @@
 ﻿  main.cpp
-C:\Users\Jade\Documents\GitHub\PongOpenGL\PongOpenGL\PongOpenGL\src\main.cpp(93,45): warning C4312: 'type cast': conversion from 'GLint' to 'void *' of greater size
-C:\Users\Jade\Documents\GitHub\PongOpenGL\PongOpenGL\PongOpenGL\src\main.cpp(115,21): warning C4244: '+=': conversion from 'double' to 'GLfloat', possible loss of data
-C:\Users\Jade\Documents\GitHub\PongOpenGL\PongOpenGL\PongOpenGL\src\main.cpp(208,55): warning C4244: 'argument': conversion from 'unsigned int' to 'float', possible loss of data
-C:\Users\Jade\Documents\GitHub\PongOpenGL\PongOpenGL\PongOpenGL\src\main.cpp(208,39): warning C4244: 'argument': conversion from 'unsigned int' to 'float', possible loss of data
-C:\Users\Jade\Documents\GitHub\PongOpenGL\PongOpenGL\PongOpenGL\src\main.cpp(319,43): warning C4244: '+=': conversion from 'double' to 'GLfloat', possible loss of data
-C:\Users\Jade\Documents\GitHub\PongOpenGL\PongOpenGL\PongOpenGL\src\main.cpp(320,43): warning C4244: '+=': conversion from 'double' to 'GLfloat', possible loss of data
-C:\Users\Jade\Documents\GitHub\PongOpenGL\PongOpenGL\PongOpenGL\src\main.cpp(323,35): warning C4244: '+=': conversion from 'double' to 'GLfloat', possible loss of data
-C:\Users\Jade\Documents\GitHub\PongOpenGL\PongOpenGL\PongOpenGL\src\main.cpp(324,35): warning C4244: '+=': conversion from 'double' to 'GLfloat', possible loss of data
-C:\Users\Jade\Documents\GitHub\PongOpenGL\PongOpenGL\PongOpenGL\src\main.cpp(379,26): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\Jade\Documents\GitHub\PongOpenGL\PongOpenGL\PongOpenGL\src\main.cpp(95,45): warning C4312: 'type cast': conversion from 'GLint' to 'void *' of greater size
+C:\Users\Jade\Documents\GitHub\PongOpenGL\PongOpenGL\PongOpenGL\src\main.cpp(117,21): warning C4244: '+=': conversion from 'double' to 'GLfloat', possible loss of data
+C:\Users\Jade\Documents\GitHub\PongOpenGL\PongOpenGL\PongOpenGL\src\main.cpp(210,55): warning C4244: 'argument': conversion from 'unsigned int' to 'float', possible loss of data
+C:\Users\Jade\Documents\GitHub\PongOpenGL\PongOpenGL\PongOpenGL\src\main.cpp(210,39): warning C4244: 'argument': conversion from 'unsigned int' to 'float', possible loss of data
+C:\Users\Jade\Documents\GitHub\PongOpenGL\PongOpenGL\PongOpenGL\src\main.cpp(321,43): warning C4244: '+=': conversion from 'double' to 'GLfloat', possible loss of data
+C:\Users\Jade\Documents\GitHub\PongOpenGL\PongOpenGL\PongOpenGL\src\main.cpp(322,43): warning C4244: '+=': conversion from 'double' to 'GLfloat', possible loss of data
+C:\Users\Jade\Documents\GitHub\PongOpenGL\PongOpenGL\PongOpenGL\src\main.cpp(325,35): warning C4244: '+=': conversion from 'double' to 'GLfloat', possible loss of data
+C:\Users\Jade\Documents\GitHub\PongOpenGL\PongOpenGL\PongOpenGL\src\main.cpp(326,35): warning C4244: '+=': conversion from 'double' to 'GLfloat', possible loss of data
+C:\Users\Jade\Documents\GitHub\PongOpenGL\PongOpenGL\PongOpenGL\src\main.cpp(381,26): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
   PongOpenGL.vcxproj -> C:\Users\Jade\Documents\GitHub\PongOpenGL\PongOpenGL\x64\Debug\PongOpenGL.exe

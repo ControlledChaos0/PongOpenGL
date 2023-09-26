@@ -13,12 +13,13 @@
 */
 std::string readFile(const char* filename);
 GLuint genShader(const char* filepath, GLenum type);
-//GLuint genShader(std::string filestring, GLenum type);
+GLuint genShaderString(std::string filestring, GLenum type);
 
 class Shader {
 public:
 	GLuint shaderObj;
 	Shader(const char* vertexShaderFile, const char* fragmentShaderFile);
+	Shader(std::string vertexShaderFile, std::string fragmentShaderFile);
 
 	void Activate();
 	void Delete();

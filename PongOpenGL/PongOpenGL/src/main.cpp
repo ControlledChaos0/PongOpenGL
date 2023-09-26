@@ -8,8 +8,10 @@
 #include "EBO.hpp"
 
 
-//#define CPP_GLSL_INCLUDE
-//#include "../assets/fragmentShader.glsl"
+#define CPP_GLSL_INCLUDE
+#include "../assets/fragString.glsl"
+#include "../assets/vertString.glsl"
+
 
 /*
 	initialization methods
@@ -203,7 +205,7 @@ int main() {
 	glViewport(0, 0, screenWidth, screenHeight);
 
 	//shaders
-	Shader shader("assets/vertexShader.glsl", "assets/fragmentShader.glsl");
+	Shader shader(vert_string, frag_string);
 	shader.Activate();
 	setOrthographicProjection(shader, 0, screenWidth, 0, screenHeight, 0.0f, 1.0f);
 

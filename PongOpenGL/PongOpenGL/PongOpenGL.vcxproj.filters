@@ -60,5 +60,7 @@
     <None Include="assets\vertexShader.glsl" />
     <None Include="assets\testFrag.glsl" />
     <None Include="assets\testVert.glsl" />
+    <None Include="assets\fragString.glsl" />
+    <None Include="assets\vertString.glsl" />
   </ItemGroup>
 </Project>

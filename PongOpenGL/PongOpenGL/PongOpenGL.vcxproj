@@ -150,9 +150,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="assets\fragmentShader.glsl" />
+    <None Include="assets\fragString.glsl" />
     <None Include="assets\testFrag.glsl" />
     <None Include="assets\testVert.glsl" />
     <None Include="assets\vertexShader.glsl" />
+    <None Include="assets\vertString.glsl" />
     <None Include="glfw3.dll" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
