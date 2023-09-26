@@ -1,5 +1,6 @@
 #include "VBO.hpp"
 
+//array with vertices, numElements (MULTIPLIED BY SIZEOF(VARIABLE), GL_STATIC_DRAW etc.)
 VBO::VBO(GLfloat* vertices, GLsizeiptr numElements, GLenum usage) {
 	glGenBuffers(1, &vboObj);
 	glBindBuffer(GL_ARRAY_BUFFER, vboObj);

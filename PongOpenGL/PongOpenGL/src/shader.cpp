@@ -46,6 +46,27 @@ GLuint genShader(const char* filepath, GLenum type) {
 	return shaderInt;
 }
 
+//GLuint genShader(std::string filestring, GLenum type) {
+//	const GLchar* shader = filestring.c_str();
+//
+//	//build and compile the shader
+//	GLuint shaderInt = glCreateShader(type);
+//	glShaderSource(shaderInt, 1, &shader, NULL);
+//	glCompileShader(shaderInt);
+//
+//	//check for errors
+//	int success;
+//	char infoLog[512];
+//	glGetShaderiv(shaderInt, GL_COMPILE_STATUS, &success);
+//	if (!success) {
+//		glGetShaderInfoLog(shaderInt, 512, NULL, infoLog);
+//		std::cout << "Error in shader compilation:" << std::endl << infoLog << std::endl;
+//		throw(errno);
+//	}
+//
+//	return shaderInt;
+//}
+
 
 /*
 	SHADER CLASS

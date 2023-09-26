@@ -6,7 +6,5 @@ layout (location = 2) in vec2 size;
 uniform mat4 projection;
 
 void main() {
-	//gl_Position = projection * vec4((pos * size) + offset, 0.0, 1.0);
-
 	gl_Position = projection * vec4((pos * size) + offset, 0.0, 1.0);
 }

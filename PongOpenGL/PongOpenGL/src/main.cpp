@@ -7,6 +7,10 @@
 #include "VBO.hpp"
 #include "EBO.hpp"
 
+
+//#define CPP_GLSL_INCLUDE
+//#include "../assets/fragmentShader.glsl"
+
 /*
 	initialization methods
 */
@@ -78,30 +82,29 @@ void setOrthographicProjection(Shader shader,
 	Vertex Array Object/Buffer Object Methods
 */
 
-template<typename T>
-void updateData(VBO& bo, GLintptr offset, GLuint numElements, T* data) {
+void updateData(VBO& bo, GLintptr offset, GLuint numElements, GLfloat* data) {
 	bo.Bind();
-	glBufferSubData(GL_ARRAY_BUFFER, offset, numElements * sizeof(T), data);
+	glBufferSubData(GL_ARRAY_BUFFER, offset, numElements * sizeof(GLfloat), data);
 }
 
 //draw VAO
 void draw(VAO vao, GLenum mode, GLuint count, GLenum type, GLint indices, GLuint instanceCount) {
-	//vao.Bind();
+	vao.Bind();
 	glDrawElementsInstanced(mode, count, type, (void*)indices, instanceCount);
 }
 
 //method to generate arrays for circle model
-void gen2DCircleArray(float*& vertices, unsigned int*& indices, unsigned int numTriangles, float radius = 0.5f) {
-	vertices = new float[(numTriangles + 1) * 2];
+void gen2DCircleArray(GLfloat*& vertices, GLuint*& indices, unsigned int numTriangles, GLfloat radius = 0.5f) {
+	vertices = new GLfloat[(numTriangles + 1) * 2];
 	vertices[0] = 0.0f;
 	vertices[1] = 0.0f;
 
-	indices = new unsigned int[numTriangles * 3];
+	indices = new GLuint[numTriangles * 3];
 
 	float numTrianglesF = (float)numTriangles;
-	float theta = 0.0f;
+	GLfloat theta = 0.0f;
 
-	for (unsigned int i = 0; i < numTriangles; i++) {
+	for (GLuint i = 0; i < numTriangles; i++) {
 		vertices[(i + 1) * 2] = radius * cosf(theta);
 		vertices[(i + 1) * 2 + 1] = radius * sinf(theta);
 
@@ -171,24 +174,6 @@ void cleanup() {
 	glfwTerminate();
 }
 
-GLfloat vertices[] =
-{
-	-0.5f, -0.5f * float(sqrt(3)) / 3, 0.0f, // Lower left corner
-	0.5f, -0.5f * float(sqrt(3)) / 3, 0.0f, // Lower right corner
-	0.0f, 0.5f * float(sqrt(3)) * 2 / 3, 0.0f, // Upper corner
-	-0.5f / 2, 0.5f * float(sqrt(3)) / 6, 0.0f, // Inner left
-	0.5f / 2, 0.5f * float(sqrt(3)) / 6, 0.0f, // Inner right
-	0.0f, -0.5f * float(sqrt(3)) / 3, 0.0f // Inner down
-};
-
-// Indices for vertices order
-GLuint indices[] =
-{
-	0, 3, 5, // Lower left triangle
-	3, 2, 4, // Lower right triangle
-	5, 4, 1 // Upper triangle
-};
-
 int main() {
 	std::cout << "Initializing Window" << std::endl;
 
@@ -222,6 +207,10 @@ int main() {
 	shader.Activate();
 	setOrthographicProjection(shader, 0, screenWidth, 0, screenHeight, 0.0f, 1.0f);
 
+	/*
+		PADDLE SETUP
+	*/
+
 	//setup vertex data
 	GLfloat paddleVertices[] = {
 		0.5f, 0.5f,
@@ -243,8 +232,11 @@ int main() {
 	};
 
 	GLfloat paddleSizes[] = {
-		10.0f, 100.0f
+		paddleWidth, paddleHeight
 	};
+
+	paddleVelocities[0] = 0.0f;
+	paddleVelocities[1] = 0.0f;
 
 	VAO paddleVAO;
 	paddleVAO.Bind();
@@ -266,15 +258,152 @@ int main() {
 	paddleSizeVBO.Unbind();
 	paddleIndEBO.Unbind();
 
+	/*
+		BALL SETUP
+	*/
+
+	GLfloat* ballVertices;
+	GLuint* ballIndices;
+	GLuint numTriangles = 20;
+
+	gen2DCircleArray(ballVertices, ballIndices, numTriangles, 0.5f);
+
+	GLfloat ballOffset[] = {
+		screenWidth / 2.0f, screenHeight / 2.0f
+	};
+
+	GLfloat ballSize[] = {
+		ballDiameter, ballDiameter
+	};
+
+	VAO ballVAO;
+	ballVAO.Bind();
+
+	VBO ballPosVBO(ballVertices, (2 * (numTriangles + 1)) * sizeof(GLfloat), GL_STATIC_DRAW);
+	ballVAO.LinkAttri(ballPosVBO, 0, 2, GL_FLOAT, 2 * sizeof(GLfloat), 0);
+
+	VBO ballOffsetVBO(ballOffset, sizeof(ballOffset), GL_DYNAMIC_DRAW);
+	ballVAO.LinkAttri(ballOffsetVBO, 1, 2, GL_FLOAT, 2 * sizeof(GLfloat), 0, 1);
+
+	VBO ballSizeVBO(ballSize, sizeof(ballSize), GL_STATIC_DRAW);
+	ballVAO.LinkAttri(ballSizeVBO, 2, 2, GL_FLOAT, 2 * sizeof(GLfloat), 0, 1);
+
+	EBO ballIndEBO(ballIndices, (3 * numTriangles) * sizeof(GLfloat), GL_STATIC_DRAW);
+
+	ballVAO.Unbind();
+	ballPosVBO.Unbind();
+	ballOffsetVBO.Unbind();
+	ballSizeVBO.Unbind();
+	ballIndEBO.Unbind();
+
+	ballVelocity = initBallVelocity;
+
+	unsigned int framesSinceLastCollision = -1;
+	unsigned int framesThreshold = 10;
+
 	while (!glfwWindowShouldClose(window)) {
+		dt = glfwGetTime() - lastFrame;
+		lastFrame += dt;
+
+		//input
+		processPaddleInput(window, dt, paddleOffsets);
+
+		/*
+			physics
+		*/
+
+		if (framesSinceLastCollision != -1) {
+			framesSinceLastCollision++;
+		}
+
+		paddleOffsets[1] += paddleVelocities[0] * dt;
+		paddleOffsets[3] += paddleVelocities[1] * dt;
+
+		//update position
+		ballOffset[0] += ballVelocity.x * dt;
+		ballOffset[1] += ballVelocity.y * dt;
+
+		/*
+			collision
+		*/
+
+		// playing field
+		if (ballOffset[1] - ballRadius <= 0 || ballOffset[1] + ballRadius >= screenHeight) {
+			ballVelocity.y *= -1;
+		}
+
+		unsigned char reset = 0;
+		if (ballOffset[0] - ballRadius <= 0) {
+			std::cout << "Right player point" << std::endl;
+			reset = 1;
+		}
+		else if (ballOffset[0] + ballRadius >= screenWidth) {
+			std::cout << "Left player point" << std::endl;
+			reset = 2;
+		}
+
+		if (reset) {
+			ballOffset[0] = screenWidth / 2.0f;
+			ballOffset[1] = screenHeight / 2.0f;
+			ballVelocity.x = reset == 1 ? initBallVelocity.x : -initBallVelocity.x;
+			ballVelocity.y = initBallVelocity.y;
+		}
+
+
+		if (framesSinceLastCollision >= framesThreshold) {
+			/*
+			paddle collision
+		*/
+			int i = 0;
+			if (ballOffset[0] > screenHeight / 2.0f) {
+				//if ball on right side, check with right paddle
+				i++;
+			}
+
+			//get distance from enter of ball to center of paddle
+			vec2 distance = { abs(ballOffset[0] - paddleOffsets[i * 2]), abs(ballOffset[1] - paddleOffsets[(i * 2) + 1]) };
+
+			//check if no collision possible
+			if (distance.x <= halfPaddleWidth + ballRadius &&
+				distance.y <= halfPaddleHeight + ballRadius) {
+				bool collision = false;
+				if (distance.x <= halfPaddleWidth && distance.x >= halfPaddleWidth - ballRadius) {
+					collision = true;
+					ballVelocity.x *= -1;
+				}
+				else if (distance.y <= halfPaddleHeight && distance.y >= halfPaddleHeight - ballRadius) {
+					collision = true;
+					ballVelocity.y *= -1;
+				}
+
+				float squaredistance = pow(distance.x - halfPaddleWidth, 2) + pow(distance.y - halfPaddleHeight, 2);
+				if (squaredistance <= pow(ballRadius, 2)) {
+					collision = true;
+					ballVelocity.x *= -1;
+				}
+
+				if (collision) {
+					float k = 0.5f;
+					ballVelocity.x += .01f;
+					ballVelocity.y += k * paddleVelocities[i];
+					framesSinceLastCollision = 0;
+				}
+			}
+		}
+
 		clearScreen();
+
+		updateData(paddleOffsetVBO, 0, 4, paddleOffsets);
+		updateData(ballOffsetVBO, 0, 2, ballOffset);
 
 		shader.Activate();
 		paddleVAO.Bind();
 		//draw(paddleVAO, GL_TRIANGLES, 3 * 2, GL_UNSIGNED_INT, 0, 2);
 		glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, 2);
-		glfwSwapBuffers(window);
-		glfwPollEvents();
+		ballVAO.Bind();
+		glDrawElementsInstanced(GL_TRIANGLES, 3 * numTriangles, GL_UNSIGNED_INT, 0, 1);
+		
+		newFrame(window);
 	}
 
 	paddleVAO.Delete();
@@ -282,6 +411,13 @@ int main() {
 	paddleOffsetVBO.Delete();
 	paddleSizeVBO.Delete();
 	paddleIndEBO.Delete();
+
+	ballVAO.Delete();
+	ballPosVBO.Delete();
+	ballOffsetVBO.Delete();
+	ballSizeVBO.Delete();
+	ballIndEBO.Delete();
+
 	shader.Delete();
 	cleanup();
 

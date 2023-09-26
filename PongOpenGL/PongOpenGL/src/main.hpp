@@ -29,8 +29,8 @@ const double pi = 3.14159265358979323846;
 //};
 
 struct vec2 {
-	float x;
-	float y;
+	GLfloat x;
+	GLfloat y;
 };
 
 //public vel
@@ -49,8 +49,7 @@ bool loadGlad();
 /*
 	Vertex Array Object/Buffer Object Methods
 */
-template<typename T>
-void updateData(VBO& bo, GLintptr offset, GLuint numElements, T* data);
+void updateData(VBO& bo, GLintptr offset, GLuint numElements, GLfloat* data);
 void draw(VAO vao, GLenum mode, GLuint count, GLenum type, GLint indices, GLuint instanceCount = 1);
 
 /*

@@ -13,6 +13,7 @@
 */
 std::string readFile(const char* filename);
 GLuint genShader(const char* filepath, GLenum type);
+//GLuint genShader(std::string filestring, GLenum type);
 
 class Shader {
 public:
